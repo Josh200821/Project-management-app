@@ -1,0 +1,11 @@
+replicaCount:
+  api: 3
+  worker: 3
+
+ingress:
+  host: app.example.com
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 20

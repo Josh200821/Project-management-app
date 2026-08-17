@@ -1,0 +1,9 @@
+replicaCount:
+  api: 1
+  worker: 1
+
+ingress:
+  host: staging.example.com
+
+autoscaling:
+  enabled: false

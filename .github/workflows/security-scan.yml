@@ -1,0 +1,38 @@
+name: Security Scan
+
+on:
+  schedule:
+    - cron: "0 2 * * 1"  # Weekly Monday 2 AM
+  workflow_dispatch:
+
+jobs:
+  trivy:
+    name: Trivy Container Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build images
+        run: |
+          docker build -f apps/api/Dockerfile --target production -t api-scan apps/api
+          docker build -f apps/web/Dockerfile --target production -t web-scan apps/web
+      - uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: api-scan
+          severity: HIGH,CRITICAL
+          exit-code: 1
+      - uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: web-scan
+          severity: HIGH,CRITICAL
+          exit-code: 1
+
+  snyk:
+    name: Snyk Dependency Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: snyk/actions/python-3.10@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high

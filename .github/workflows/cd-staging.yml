@@ -1,0 +1,54 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy Staging
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Update kubeconfig
+        run: aws eks update-kubeconfig --name saas-platform-staging --region us-east-1
+
+      - name: Run migrations
+        run: |
+          kubectl run migration-${{ github.sha }} \
+            --image=ghcr.io/${{ github.repository }}/api:${{ github.sha }} \
+            --restart=Never \
+            --env="DATABASE_URL=${{ secrets.DATABASE_URL }}" \
+            --command -- alembic upgrade head
+          kubectl wait --for=condition=complete job/migration-${{ github.sha }} --timeout=120s
+
+      - name: Deploy with Helm
+        run: |
+          helm upgrade --install saas-platform ./infra/helm/saas-platform \
+            --namespace staging --create-namespace \
+            --values infra/helm/saas-platform/values-staging.yaml \
+            --set api.image.tag=${{ github.sha }} \
+            --set web.image.tag=${{ github.sha }} \
+            --wait --timeout 5m
+
+      - name: Run smoke tests
+        run: |
+          STAGING_URL=$(kubectl get ingress -n staging -o jsonpath='{.items[0].status.loadBalancer.ingress[0].hostname}')
+          curl -f "https://${STAGING_URL}/health" || exit 1
+
+      - name: OWASP ZAP DAST scan
+        uses: zaproxy/action-full-scan@v0.10.0
+        with:
+          target: ${{ vars.STAGING_URL }}
+          fail_action: true
+          cmd_options: "-l WARN"

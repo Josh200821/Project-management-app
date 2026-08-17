@@ -1,0 +1,6 @@
+apiVersion: v2
+name: saas-platform
+description: SaaS Project Management Platform Helm chart
+type: application
+version: 1.0.0
+appVersion: "1.0.0"

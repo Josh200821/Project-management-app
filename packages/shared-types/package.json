@@ -1,0 +1,10 @@
+{
+  "name": "@saas-platform/shared-types",
+  "version": "1.0.0",
+  "description": "Shared TypeScript types for SaaS Platform",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "build": "tsc"
+  }
+}

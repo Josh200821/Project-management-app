@@ -1,0 +1,37 @@
+name: Preview Environment
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+
+jobs:
+  deploy-preview:
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy preview
+        run: |
+          NS="preview-pr-${{ github.event.pull_request.number }}"
+          helm upgrade --install saas-pr-${{ github.event.pull_request.number }} \
+            ./infra/helm/saas-platform \
+            --namespace $NS --create-namespace \
+            --set api.image.tag=${{ github.sha }} \
+            --set ingress.host=pr-${{ github.event.pull_request.number }}.preview.example.com
+      - name: Comment PR with preview URL
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '🚀 Preview deployed: https://pr-${{ github.event.pull_request.number }}.preview.example.com'
+            })
+
+  teardown-preview:
+    if: github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Teardown preview
+        run: helm uninstall saas-pr-${{ github.event.pull_request.number }} --namespace preview-pr-${{ github.event.pull_request.number }}

@@ -1,0 +1,12 @@
+{
+  "title": "SaaS Platform — API Overview",
+  "panels": [
+    {"title": "Request Rate", "type": "graph"},
+    {"title": "Error Rate (5xx)", "type": "graph"},
+    {"title": "P99 Latency", "type": "graph"},
+    {"title": "Active DB Connections", "type": "stat"},
+    {"title": "Celery Queue Depth", "type": "graph"},
+    {"title": "Redis Cache Hit Rate", "type": "stat"}
+  ],
+  "schemaVersion": 36
+}

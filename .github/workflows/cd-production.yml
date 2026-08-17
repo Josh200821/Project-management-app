@@ -1,0 +1,47 @@
+name: Deploy to Production
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  deploy:
+    name: Deploy Production
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Update kubeconfig
+        run: aws eks update-kubeconfig --name saas-platform-production --region us-east-1
+
+      - name: Run migrations
+        run: |
+          kubectl run migration-${{ github.sha }} \
+            --image=ghcr.io/${{ github.repository }}/api:${{ github.sha }} \
+            --restart=Never \
+            --env="DATABASE_URL=${{ secrets.DATABASE_URL }}" \
+            --command -- alembic upgrade head
+          kubectl wait --for=condition=complete pod/migration-${{ github.sha }} --timeout=180s
+
+      - name: Deploy with Helm
+        run: |
+          helm upgrade --install saas-platform ./infra/helm/saas-platform \
+            --namespace production \
+            --values infra/helm/saas-platform/values-production.yaml \
+            --set api.image.tag=${{ github.sha }} \
+            --set web.image.tag=${{ github.sha }} \
+            --wait --timeout 10m
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true

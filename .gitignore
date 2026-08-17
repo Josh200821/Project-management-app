@@ -1,0 +1,66 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+.env
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Node
+node_modules/
+dist/
+.next/
+.nuxt/
+.cache/
+*.tsbuildinfo
+
+# Environment
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Keys (never commit private keys)
+apps/api/keys/private.pem
+*.pem
+*.key
+
+# Terraform
+infra/terraform/**/.terraform/
+infra/terraform/**/*.tfstate
+infra/terraform/**/*.tfstate.backup
+infra/terraform/**/.terraform.lock.hcl
+
+# Docker
+.docker/
+
+# Logs
+*.log
+logs/
+
+# Test artifacts
+test-results/
+playwright-report/
+coverage/
+locust_report/

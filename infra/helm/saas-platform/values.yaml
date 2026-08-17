@@ -1,0 +1,48 @@
+replicaCount:
+  api: 2
+  worker: 2
+
+image:
+  registry: ghcr.io
+  repository: your-org/saas-platform
+  pullPolicy: IfNotPresent
+
+api:
+  image:
+    tag: latest
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 512Mi
+
+web:
+  image:
+    tag: latest
+
+ingress:
+  enabled: true
+  className: nginx
+  host: app.example.com
+  tls: true
+
+postgresql:
+  enabled: false  # Use managed RDS in production
+  external:
+    host: ""
+    port: 5432
+    database: saas_platform
+
+redis:
+  enabled: false  # Use managed ElastiCache in production
+  external:
+    host: ""
+    port: 6379
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70

@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: celery-beat
+  labels:
+    app: saas-platform
+    component: beat
+spec:
+  replicas: 1  # ALWAYS exactly 1 — multiple beat instances cause duplicate tasks
+  selector:
+    matchLabels:
+      component: beat
+  template:
+    metadata:
+      labels:
+        app: saas-platform
+        component: beat
+    spec:
+      containers:
+        - name: beat
+          image: ghcr.io/your-org/saas-platform/api:latest
+          command: ["celery", "-A", "app.workers.celery_app", "beat", "--loglevel=info"]
+          envFrom:
+            - secretRef:
+                name: saas-platform-secrets
+            - configMapRef:
+                name: saas-platform-config
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi

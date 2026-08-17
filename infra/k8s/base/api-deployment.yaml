@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  labels:
+    app: saas-platform
+    component: api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      component: api
+  template:
+    metadata:
+      labels:
+        app: saas-platform
+        component: api
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: api
+          image: ghcr.io/your-org/saas-platform/api:latest
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - secretRef:
+                name: saas-platform-secrets
+            - configMapRef:
+                name: saas-platform-config
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /health/db
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api
+spec:
+  selector:
+    component: api
+  ports:
+    - port: 8000
+      targetPort: 8000
