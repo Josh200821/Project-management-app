@@ -1,6 +1,5 @@
 """Application configuration via pydantic-settings."""
 from functools import lru_cache
-from typing import List
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -9,24 +8,23 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     # Application
+    VERSION: str = "1.0.0"
     ENVIRONMENT: str = "development"
     DEBUG: bool = False
     SECRET_KEY: str = "change-me"
-    ALLOWED_ORIGINS: List[str] = ["http://localhost:3000"]
-    ALLOWED_HOSTS: List[str] = ["*"]
+    ALLOWED_ORIGINS: list[str] = ["http://localhost:3000"]
+    ALLOWED_HOSTS: list[str] = ["*"]
 
     # Database
-    
-    
     DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/saas_platform"
     DATABASE_URL_SYNC: str = "postgresql://postgres:postgres@localhost:5432/saas_platform"
     DATABASE_URL_REPLICA: str = ""
-
-    DATABASE_POOL_SIZE: int = 10
-    DATABASE_MAX_OVERFLOW: int = 20
+    DATABASE_POOL_SIZE: int = 20
+    DATABASE_MAX_OVERFLOW: int = 10
 
     @property
     def effective_read_url(self) -> str:
+        """Falls back to the primary database when no replica is configured."""
         return self.DATABASE_URL_REPLICA or self.DATABASE_URL
 
     # Redis
@@ -36,14 +34,17 @@ class Settings(BaseSettings):
     # JWT
     JWT_PRIVATE_KEY_PATH: str = "keys/private.pem"
     JWT_PUBLIC_KEY_PATH: str = "keys/public.pem"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
-    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+    JWT_ALGORITHM: str = "RS256"
+    JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
+    JWT_REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
     # OAuth
     GOOGLE_CLIENT_ID: str = ""
     GOOGLE_CLIENT_SECRET: str = ""
     GITHUB_CLIENT_ID: str = ""
     GITHUB_CLIENT_SECRET: str = ""
+    MICROSOFT_CLIENT_ID: str = ""
+    MICROSOFT_CLIENT_SECRET: str = ""
 
     # S3
     S3_ENDPOINT_URL: str = ""
@@ -55,6 +56,7 @@ class Settings(BaseSettings):
     # Email
     SMTP_HOST: str = "localhost"
     SMTP_PORT: int = 1025
+    SMTP_USE_TLS: bool = False
     SMTP_USERNAME: str = ""
     SMTP_PASSWORD: str = ""
     FROM_EMAIL: str = "noreply@example.com"
@@ -63,6 +65,9 @@ class Settings(BaseSettings):
     # Stripe
     STRIPE_SECRET_KEY: str = ""
     STRIPE_WEBHOOK_SECRET: str = ""
+    STRIPE_FREE_PRICE_ID: str = ""
+    STRIPE_PRO_PRICE_ID: str = ""
+    STRIPE_ENTERPRISE_PRICE_ID: str = ""
 
     # AI
     ANTHROPIC_API_KEY: str = ""
