@@ -100,3 +100,6 @@ addopts = "-v --tb=short"
 [tool.coverage.run]
 source = ["app"]
 omit = ["app/tests/*", "app/db/seed.py"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
