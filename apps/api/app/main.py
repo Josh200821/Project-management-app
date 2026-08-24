@@ -9,8 +9,8 @@ from prometheus_fastapi_instrumentator import Instrumentator
 import sentry_sdk
 
 from app.config import settings
-from app.core.logging import setup_logging
-from app.core.telemetry import setup_telemetry
+from app.core.logging import configure_logging
+from app.core.telemetry import configure_telemetry
 from app.db.base import engine
 from app.middleware.correlation_id import CorrelationIdMiddleware
 from app.middleware.logging import RequestLoggingMiddleware
@@ -28,8 +28,8 @@ from app.routers.ws import notifications as ws_notifications
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Application lifespan events."""
-    setup_logging()
-    setup_telemetry()
+    configure_logging()
+    configure_telemetry()
     if settings.SENTRY_DSN:
         sentry_sdk.init(dsn=settings.SENTRY_DSN, environment=settings.ENVIRONMENT)
     yield

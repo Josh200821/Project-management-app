@@ -47,7 +47,7 @@ def create_refresh_token(subject: str) -> str:
     return jwt.encode(payload, private_key, algorithm=settings.JWT_ALGORITHM)
 
 
-def decode_token(token: str) -> dict:
+def decode_access_token(token: str) -> dict:
     public_key = _load_key(settings.JWT_PUBLIC_KEY_PATH)
     return jwt.decode(token, public_key, algorithms=[settings.JWT_ALGORITHM])
 

@@ -16,9 +16,18 @@ class Settings(BaseSettings):
     ALLOWED_HOSTS: List[str] = ["*"]
 
     # Database
+    
+    
     DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/saas_platform"
     DATABASE_URL_SYNC: str = "postgresql://postgres:postgres@localhost:5432/saas_platform"
     DATABASE_URL_REPLICA: str = ""
+
+    DATABASE_POOL_SIZE: int = 10
+    DATABASE_MAX_OVERFLOW: int = 20
+
+    @property
+    def effective_read_url(self) -> str:
+        return self.DATABASE_URL_REPLICA or self.DATABASE_URL
 
     # Redis
     REDIS_URL: str = "redis://localhost:6379/0"
