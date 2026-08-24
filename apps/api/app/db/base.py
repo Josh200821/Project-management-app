@@ -1,49 +1,58 @@
-"""SQLAlchemy async engine and session factory."""
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from sqlalchemy.orm import DeclarativeBase
+"""Generic async CRUD base repository."""
+from typing import Any, Generic, TypeVar
+from uuid import UUID
 
-from app.config import settings
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
-engine = create_async_engine(
-    settings.DATABASE_URL,
-    pool_size=settings.DATABASE_POOL_SIZE,
-    max_overflow=settings.DATABASE_MAX_OVERFLOW,
-    pool_pre_ping=True,
-    echo=settings.DEBUG,
-)
+from app.db.base import Base
 
-read_engine = create_async_engine(
-    settings.effective_read_url,
-    pool_size=10,
-    max_overflow=5,
-    pool_pre_ping=True,
-)
-
-AsyncSessionLocal = async_sessionmaker(
-    engine,
-    class_=AsyncSession,
-    expire_on_commit=False,
-)
-
-ReadAsyncSessionLocal = async_sessionmaker(
-    read_engine,
-    class_=AsyncSession,
-    expire_on_commit=False,
-)
+ModelT = TypeVar("ModelT", bound=Base)
 
 
-async def get_session():
-    async with AsyncSessionLocal() as session:
-        yield session
+class BaseRepository(Generic[ModelT]):
+    def __init__(self, model: type[ModelT], session: AsyncSession) -> None:
+        self.model = model
+        self.session = session
 
+    async def get(self, id: UUID) -> ModelT | None:
+        result = await self.session.execute(select(self.model).where(self.model.id == id))
+        return result.scalar_one_or_none()
 
-class Base(DeclarativeBase):
-    pass
+    async def get_all(self, offset: int = 0, limit: int = 20) -> list[ModelT]:
+        result = await self.session.execute(
+            select(self.model).offset(offset).limit(limit)
+        )
+        return list(result.scalars().all())
 
-# Database
-DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/saas_platform"
-DATABASE_URL_SYNC: str = "postgresql://postgres:postgres@localhost:5432/saas_platform"
-DATABASE_URL_REPLICA: str = ""
+    async def list(self, offset: int = 0, limit: int = 100, **filters: Any) -> list[ModelT]:
+        """Simple equality-filtered listing, e.g. `repo.list(status="active")`."""
+        query = select(self.model)
+        for field, value in filters.items():
+            query = query.where(getattr(self.model, field) == value)
+        query = query.offset(offset).limit(limit)
+        result = await self.session.execute(query)
+        return list(result.scalars().all())
 
-DATABASE_POOL_SIZE: int = 10
-DATABASE_MAX_OVERFLOW: int = 20
+    async def count(self) -> int:
+        result = await self.session.execute(select(func.count()).select_from(self.model))
+        return result.scalar_one()
+
+    async def create(self, **kwargs: Any) -> ModelT:
+        obj = self.model(**kwargs)
+        self.session.add(obj)
+        await self.session.flush()
+        await self.session.refresh(obj)
+        return obj
+
+    async def update(self, obj: ModelT, **kwargs: Any) -> ModelT:
+        for key, value in kwargs.items():
+            if value is not None:
+                setattr(obj, key, value)
+        await self.session.flush()
+        await self.session.refresh(obj)
+        return obj
+
+    async def delete(self, obj: ModelT) -> None:
+        await self.session.delete(obj)
+        await self.session.flush()
