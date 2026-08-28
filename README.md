@@ -149,17 +149,17 @@ make logs         # Tail logs for all services
 - [x] Prometheus/Grafana/Sentry/OpenTelemetry wiring started in `main.py`
 
 ### 🚧 Currently broken / in progress
-- [ ] Fix backend packaging (`pyproject.toml` Hatchling config) so `pip install -e apps/api` succeeds
-- [ ] Reconcile `app/config.py` `Settings` fields with what the rest of the app actually reads (DB pool sizing, JWT settings, read-replica URL)
-- [ ] Implement `app/db/base.py:get_session` dependency
-- [ ] Fix `core/security.py` ↔ `dependencies.py` mismatch (`decode_token` vs `decode_access_token`, `generate_api_key` return arity)
-- [ ] Fill in the 10 empty SQLAlchemy model files: `ActivityLog`, `ApiKey`, `Attachment`, `AuditLog`, `Comment`, `Notification`, `OrganizationMember`, `Sprint`, `TimeEntry`, `Webhook`
-- [ ] Add the missing `BaseRepository.list()` method (or update callers to use `get_all`)
-- [ ] Build out `AuthService` to match what `routers/v1/auth.py` expects: `login`, `refresh_tokens`, `setup_mfa`, `verify_mfa`, `request_password_reset`, `confirm_password_reset`
-- [ ] Turn `ai_service.py` into the `AIService` class `routers/v1/ai.py` expects (or update the router to call the module functions directly)
-- [ ] Add an ESLint config for `apps/web`
-- [ ] Add the missing `apps/web/tsconfig.node.json`
-- [ ] Clean up the 281 `ruff` findings and 55 `mypy` findings in the API
+- [x] Fix backend packaging (`pyproject.toml` Hatchling config) so `pip install -e apps/api` succeeds
+- [x] Reconcile `app/config.py` `Settings` fields with what the rest of the app actually reads (DB pool sizing, JWT settings, read-replica URL)
+- [x] Implement `app/db/base.py:get_session` dependency
+- [x] Fix `core/security.py` ↔ `dependencies.py` mismatch (`decode_token` vs `decode_access_token`, `generate_api_key` return arity)
+- [x] Fill in the 10 empty SQLAlchemy model files: `ActivityLog`, `ApiKey`, `Attachment`, `AuditLog`, `Comment`, `Notification`, `OrganizationMember`, `Sprint`, `TimeEntry`, `Webhook`
+- [x] Add the missing `BaseRepository.list()` method (or update callers to use `get_all`)
+- [x] Build out `AuthService` to match what `routers/v1/auth.py` expects: `login`, `refresh_tokens`, `setup_mfa`, `verify_mfa`, `request_password_reset`, `confirm_password_reset`
+- [x] Turn `ai_service.py` into the `AIService` class `routers/v1/ai.py` expects (or update the router to call the module functions directly)
+- [x] Add an ESLint config for `apps/web`
+- [x] Add the missing `apps/web/tsconfig.node.json`
+- [x] Clean up the 281 `ruff` findings and 55 `mypy` findings in the API
 - [ ] Re-run Trivy locally and update/patch any HIGH/CRITICAL dependency findings
 - [ ] Configure staging deploy secrets (`AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY`) and confirm the `build` job actually pushes images before staging deploy is expected to work
 - [ ] Get `make dev` to a state where the API boots and `/health` responds
