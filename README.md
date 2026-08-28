@@ -149,10 +149,10 @@ make logs         # Tail logs for all services
 - [x] Prometheus/Grafana/Sentry/OpenTelemetry wiring started in `main.py`
 
 ### 🚧 Currently broken / in progress
-- [x] Fix backend packaging (`pyproject.toml` Hatchling config) so `pip install -e apps/api` succeeds
-- [x] Reconcile `app/config.py` `Settings` fields with what the rest of the app actually reads (DB pool sizing, JWT settings, read-replica URL)
-- [x] Implement `app/db/base.py:get_session` dependency
-- [x] Fix `core/security.py` ↔ `dependencies.py` mismatch (`decode_token` vs `decode_access_token`, `generate_api_key` return arity)
+- [ ] Fix backend packaging (`pyproject.toml` Hatchling config) so `pip install -e apps/api` succeeds
+- [ ] Reconcile `app/config.py` `Settings` fields with what the rest of the app actually reads (DB pool sizing, JWT settings, read-replica URL)
+- [ ] Implement `app/db/base.py:get_session` dependency
+- [ ] Fix `core/security.py` ↔ `dependencies.py` mismatch (`decode_token` vs `decode_access_token`, `generate_api_key` return arity)
 - [ ] Fill in the 10 empty SQLAlchemy model files: `ActivityLog`, `ApiKey`, `Attachment`, `AuditLog`, `Comment`, `Notification`, `OrganizationMember`, `Sprint`, `TimeEntry`, `Webhook`
 - [ ] Add the missing `BaseRepository.list()` method (or update callers to use `get_all`)
 - [ ] Build out `AuthService` to match what `routers/v1/auth.py` expects: `login`, `refresh_tokens`, `setup_mfa`, `verify_mfa`, `request_password_reset`, `confirm_password_reset`
@@ -188,4 +188,4 @@ Once the backend actually boots:
 - OWASP ZAP DAST in CI before production deploys
 
 ## License
-Not yet decided
+not yet decided
